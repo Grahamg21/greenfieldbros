@@ -1,0 +1,75 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --neon: #00ff9f;
+  --purple: #8b5cf6;
+}
+
+* {
+  box-sizing: border-box;
+  padding: 0;
+  margin: 0;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  background-color: #0a0a0f;
+  color: #f0f2f5;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+}
+::-webkit-scrollbar-track {
+  background: #0a0a0f;
+}
+::-webkit-scrollbar-thumb {
+  background: #1e2433;
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #00ff9f44;
+}
+
+/* Neon glow utility */
+.neon-glow {
+  text-shadow: 0 0 10px #00ff9f80, 0 0 30px #00ff9f40;
+}
+
+.neon-border {
+  box-shadow: 0 0 0 1px #00ff9f30, inset 0 0 0 1px #00ff9f10;
+}
+
+.neon-border:hover {
+  box-shadow: 0 0 0 1px #00ff9f60, 0 0 20px #00ff9f20, inset 0 0 0 1px #00ff9f20;
+}
+
+/* Card base */
+.card {
+  background: #0f1117;
+  border: 1px solid #1e2433;
+  border-radius: 12px;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.card:hover {
+  border-color: #00ff9f30;
+  box-shadow: 0 0 20px #00ff9f10;
+}
+
+/* Section headings */
+.section-label {
+  font-family: 'Courier New', monospace;
+  font-size: 0.75rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: #00ff9f;
+}
