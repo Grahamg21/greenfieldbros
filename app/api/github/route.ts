@@ -2,8 +2,7 @@ import { NextResponse } from "next/server";
 
 const USERS = [
   { key: "graham", username: "Grahamg21" },
-  // Add Gabe's GitHub username here when known
-  // { key: "brother", username: "gabesusername" },
+  { key: "brother", username: "gaberoo322" },
 ];
 
 // Fallback descriptions for repos that don't have one set on GitHub
