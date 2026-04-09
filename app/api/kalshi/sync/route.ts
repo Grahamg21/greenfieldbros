@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { getAllFills, getMarket, type KalshiFill } from "@/lib/kalshi";
-import { supabase } from "@/lib/supabase";
+import { supabaseAdmin } from "@/lib/supabase";
 
 // Detect category from market title/ticker
 function detectCategory(title: string, ticker: string): string {
@@ -109,7 +109,7 @@ export async function POST(req: Request) {
     }
 
     // Upsert all rows
-    const { error } = await supabase.from("bets").upsert(rows, { onConflict: "id" });
+    const { error } = await supabaseAdmin.from("bets").upsert(rows, { onConflict: "id" });
     if (error) throw new Error(error.message);
 
     return NextResponse.json({
