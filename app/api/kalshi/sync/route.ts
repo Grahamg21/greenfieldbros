@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { getAllFills, getMarket, type KalshiFill } from "@/lib/kalshi";
+import { getAllFills, getMarket, getOpenPositionTickers, type KalshiFill } from "@/lib/kalshi";
 import { supabaseAdmin } from "@/lib/supabase";
 
 // Detect category from market title/ticker
@@ -28,7 +28,11 @@ export async function POST(req: Request) {
   const player = body.player ?? "graham";
 
   try {
-    const fills = await getAllFills();
+    const [fills, openTickers] = await Promise.all([
+      getAllFills(),
+      getOpenPositionTickers(),
+    ]);
+
     if (!fills.length) {
       return NextResponse.json({ synced: 0, message: "No fills found" });
     }
@@ -60,7 +64,6 @@ export async function POST(req: Request) {
       let latestSide: "yes" | "no" = "yes";
       let placedAt = marketFills[0].created_time;
       let settledAt: string | null = null;
-      let status = "open";
 
       for (const fill of marketFills) {
         const contracts = parseFloat(fill.count_fp);
@@ -75,19 +78,26 @@ export async function POST(req: Request) {
           latestSide = fill.side;
           if (fill.created_time < placedAt) placedAt = fill.created_time;
         } else {
-          // sell = payout or exit
           totalPayout += cost;
           settledAt = fill.created_time;
-          status = "settled";
         }
       }
 
-      const profitLoss = totalPayout > 0
-        ? totalPayout - totalCost
-        : -totalCost; // open position, mark as cost
+      // Use Kalshi positions API as source of truth for open/settled
+      const isOpen = openTickers.has(ticker);
+      const profitLoss = isOpen
+        ? -totalCost  // open: unrealized cost
+        : totalPayout - totalCost; // settled: actual P&L
 
-      if (status === "settled") {
-        status = profitLoss > 0 ? "won" : "lost";
+      let status: string;
+      if (isOpen) {
+        status = "open";
+      } else if (profitLoss > 0) {
+        status = "won";
+      } else if (profitLoss < 0) {
+        status = "lost";
+      } else {
+        status = "lost"; // broke even counts as loss
       }
 
       rows.push({

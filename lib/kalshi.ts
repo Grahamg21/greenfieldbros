@@ -69,6 +69,14 @@ export async function getMarket(ticker: string) {
   }
 }
 
+// Get all open position tickers (what you currently hold)
+export async function getOpenPositionTickers(): Promise<Set<string>> {
+  const data = await kalshiGet("/trade-api/v2/portfolio/positions", { limit: "100" });
+  const positions: { ticker: string; position: number }[] = data.market_positions ?? [];
+  // Only positions with non-zero contracts are truly open
+  return new Set(positions.filter((p) => p.position !== 0).map((p) => p.ticker));
+}
+
 export type KalshiFill = {
   fill_id: string;
   trade_id: string;
