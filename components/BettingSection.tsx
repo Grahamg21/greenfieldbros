@@ -1,5 +1,6 @@
 "use client";
 import { useEffect, useState } from "react";
+import BalanceChart from "./BalanceChart";
 
 type Bet = {
   id: string;
@@ -153,6 +154,11 @@ export default function BettingSection() {
 
         {stats && stats.total > 0 && (
           <>
+            {/* Balance timeline chart */}
+            <div className="mb-6">
+              <BalanceChart />
+            </div>
+
             {/* KPI row */}
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-6">
               <StatCard

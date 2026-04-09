@@ -69,6 +69,23 @@ export async function getMarket(ticker: string) {
   }
 }
 
+// Get all settlements paginated
+export async function getAllSettlements() {
+  const all: KalshiSettlement[] = [];
+  let cursor: string | undefined;
+  for (let i = 0; i < 20; i++) {
+    const params: Record<string, string> = { limit: "100" };
+    if (cursor) params.cursor = cursor;
+    const data = await kalshiGet("/trade-api/v2/portfolio/settlements", params);
+    const items: KalshiSettlement[] = data.settlements ?? [];
+    all.push(...items);
+    if (!data.cursor || items.length < 100) break;
+    cursor = data.cursor;
+    await new Promise((r) => setTimeout(r, 300));
+  }
+  return all;
+}
+
 // Get all open position tickers (what you currently hold)
 export async function getOpenPositionTickers(): Promise<Set<string>> {
   const data = await kalshiGet("/trade-api/v2/portfolio/positions", { limit: "100" });
@@ -76,6 +93,19 @@ export async function getOpenPositionTickers(): Promise<Set<string>> {
   // Only positions with non-zero contracts are truly open
   return new Set(positions.filter((p) => p.position !== 0).map((p) => p.ticker));
 }
+
+export type KalshiSettlement = {
+  ticker: string;
+  event_ticker: string;
+  market_result: string;
+  yes_count_fp: string;
+  no_count_fp: string;
+  yes_total_cost_dollars: string;
+  no_total_cost_dollars: string;
+  revenue: number;
+  fee_cost: string;
+  settled_time: string;
+};
 
 export type KalshiFill = {
   fill_id: string;

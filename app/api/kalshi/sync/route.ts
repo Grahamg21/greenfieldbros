@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { getAllFills, getMarket, getOpenPositionTickers, type KalshiFill } from "@/lib/kalshi";
+import { getAllFills, getAllSettlements, getMarket, getOpenPositionTickers, type KalshiFill } from "@/lib/kalshi";
 import { supabaseAdmin } from "@/lib/supabase";
 
 // Detect category from market title/ticker
@@ -28,9 +28,10 @@ export async function POST(req: Request) {
   const player = body.player ?? "graham";
 
   try {
-    const [fills, openTickers] = await Promise.all([
+    const [fills, openTickers, settlements] = await Promise.all([
       getAllFills(),
       getOpenPositionTickers(),
+      getAllSettlements(),
     ]);
 
     if (!fills.length) {
@@ -118,13 +119,37 @@ export async function POST(req: Request) {
       });
     }
 
-    // Upsert all rows
+    // Upsert bets
     const { error } = await supabaseAdmin.from("bets").upsert(rows, { onConflict: "id" });
     if (error) throw new Error(error.message);
+
+    // Upsert settlements
+    const settlementRows = settlements.map((s) => {
+      const cost = parseFloat(s.yes_total_cost_dollars) + parseFloat(s.no_total_cost_dollars);
+      const revenue = s.revenue / 100; // Kalshi returns revenue in cents
+      return {
+        id: s.ticker + "_" + player,
+        player,
+        ticker: s.ticker,
+        event_ticker: s.event_ticker,
+        market_result: s.market_result,
+        cost: parseFloat(cost.toFixed(4)),
+        revenue: parseFloat(revenue.toFixed(4)),
+        profit_loss: parseFloat((revenue - cost).toFixed(4)),
+        fee_cost: parseFloat(s.fee_cost),
+        settled_time: s.settled_time,
+      };
+    });
+
+    if (settlementRows.length > 0) {
+      const { error: se } = await supabaseAdmin.from("settlements").upsert(settlementRows, { onConflict: "id" });
+      if (se) console.error("Settlements upsert error:", se.message);
+    }
 
     return NextResponse.json({
       success: true,
       synced: rows.length,
+      settlements: settlementRows.length,
       player,
       fills: fills.length,
     });
