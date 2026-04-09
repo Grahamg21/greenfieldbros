@@ -4,6 +4,7 @@ import ProjectsSection from "@/components/ProjectsSection";
 import GamingSection from "@/components/GamingSection";
 import RocketLeaguePage from "@/components/RocketLeaguePage";
 import GolfSection from "@/components/GolfSection";
+import BettingSection from "@/components/BettingSection";
 import Footer from "@/components/Footer";
 
 export default function Home() {
@@ -15,6 +16,7 @@ export default function Home() {
       <GamingSection />
       <RocketLeaguePage />
       <GolfSection />
+      <BettingSection />
       <Footer />
     </main>
   );

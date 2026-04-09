@@ -6,6 +6,7 @@ const links = [
   { label: "Gaming", href: "#gaming" },
   { label: "Rocket League", href: "#rocketleague" },
   { label: "Golf", href: "#golf" },
+  { label: "Predictions", href: "#betting" },
 ];
 
 export default function Nav() {
